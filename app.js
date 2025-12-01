@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const pool = require("./db");
+const Pool = require("./db");
 
 const app = express();
 // ? Middleware
@@ -181,5 +181,6 @@ app.delete("/books/:id", async (req, res) => {
     res.status(500).json({ error: true, message: "Server Error" });
   }
 });
+
 
 module.exports = app;
