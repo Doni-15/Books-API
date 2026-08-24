@@ -1,19 +1,14 @@
-import { Pool } from "pg";
-import dotenv from "dotenv";
-
-dotenv.config();
+const { Pool } = require('pg');
+const { database } = require('./config');
 
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-
-    ssl: {
-        rejectUnauthorized: false,
-    },
-    
-    port: process.env.DB_PORT,
+    ...(database.connectionString ? { connectionString: database.connectionString } : {}),
+    user: database.user,
+    host: database.host,
+    database: database.database,
+    password: database.password,
+    ssl: database.ssl,
+    port: database.port,
 });
 
 
@@ -22,7 +17,7 @@ pool.on("connect", () => {
 });
 
 pool.on("error", (err) => {
-    console.error("Database erro", err);
+    console.error("Database error", err.message);
 });
 
-export default pool;
+module.exports = pool;

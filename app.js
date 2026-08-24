@@ -1,11 +1,20 @@
 const express = require("express");
 const cors = require("cors");
-const Pool = require("./db");
+const pool = require("./db");
+const { corsOrigins } = require('./config');
+const { requireMutationKey } = require('./mutationAuth');
 
 const app = express();
 // ? Middleware
-app.use(express.json());
-app.use(cors());
+app.use(express.json({ limit: '100kb' }));
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || corsOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Origin tidak diizinkan.'));
+  },
+}));
 
 // ! API
 
@@ -101,7 +110,7 @@ app.get("/books/:id", async (req, res) => {
 });
 
 // ? Menambahkan buku
-app.post("/books", async (req, res) => {
+app.post("/books", requireMutationKey, async (req, res) => {
   const { title, author, publish_date, publisher } = req.body;
 
   if (!title || !author || !publish_date || !publisher) {
@@ -130,7 +139,7 @@ app.post("/books", async (req, res) => {
 });
 
 // ? Mengedit buku berdasarkan id
-app.put("/books/:id", async (req, res) => {
+app.put("/books/:id", requireMutationKey, async (req, res) => {
   try {
     const { id } = req.params;
     const { title, author, publish_date, publisher } = req.body;
@@ -159,7 +168,7 @@ app.put("/books/:id", async (req, res) => {
 });
 
 // ? Menghapus buku
-app.delete("/books/:id", async (req, res) => {
+app.delete("/books/:id", requireMutationKey, async (req, res) => {
   const { id } = req.params;
 
   try {
